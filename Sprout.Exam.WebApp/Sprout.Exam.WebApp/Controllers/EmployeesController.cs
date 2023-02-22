@@ -1,12 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Sprout.Exam.Business.DataTransferObjects;
-using Sprout.Exam.Common.Enums;
 
 namespace Sprout.Exam.WebApp.Controllers
 {
@@ -104,8 +100,9 @@ namespace Sprout.Exam.WebApp.Controllers
         {
             var result = await Task.FromResult(StaticEmployees.ResultList.FirstOrDefault(m => m.Id == id));
 
-            if (result == null) return NotFound();
-            var type = (EmployeeType) result.TypeId;
+            //if (result == null) 
+            return NotFound();
+            /*var type = (EmployeeType) result.TypeId;
             return type switch
             {
                 EmployeeType.Regular =>
@@ -115,7 +112,7 @@ namespace Sprout.Exam.WebApp.Controllers
                     //create computation for contractual.
                     Ok(20000),
                 _ => NotFound("Employee Type not found")
-            };
+            };*/
 
         }
 

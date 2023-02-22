@@ -2,13 +2,9 @@
 using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Sprout.Exam.WebApp.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Sprout.Exam.Models;
 
-namespace Sprout.Exam.WebApp.Data
+namespace Sprout.Exam.DataAccess
 {
     public class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>
     {
@@ -16,6 +12,11 @@ namespace Sprout.Exam.WebApp.Data
             DbContextOptions options,
             IOptions<OperationalStoreOptions> operationalStoreOptions) : base(options, operationalStoreOptions)
         {
+            Employees = Set<EmployeeEntity>();
+            EmployeeTypes = Set<EmployeeTypeEntity>();
         }
+
+        public DbSet<EmployeeEntity> Employees { get; }
+        public DbSet<EmployeeTypeEntity> EmployeeTypes { get; }
     }
 }

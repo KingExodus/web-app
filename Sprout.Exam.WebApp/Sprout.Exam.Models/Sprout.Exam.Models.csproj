@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Sprout.Exam.DataAccess\Sprout.Exam.DataAccess.csproj" />
+    <ProjectReference Include="..\Sprout.Exam.Common\Sprout.Exam.Common.csproj" />
   </ItemGroup>
 
 </Project>

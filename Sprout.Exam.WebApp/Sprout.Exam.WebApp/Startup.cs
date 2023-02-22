@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Sprout.Exam.WebApp.Data;
-using Sprout.Exam.WebApp.Models;
+using Sprout.Exam.Business;
+using Sprout.Exam.DataAccess;
 
 namespace Sprout.Exam.WebApp
 {
