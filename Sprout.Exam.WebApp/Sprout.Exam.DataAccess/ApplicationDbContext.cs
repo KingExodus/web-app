@@ -12,11 +12,11 @@ namespace Sprout.Exam.DataAccess
             DbContextOptions options,
             IOptions<OperationalStoreOptions> operationalStoreOptions) : base(options, operationalStoreOptions)
         {
-            Employees = Set<EmployeeEntity>();
-            EmployeeTypes = Set<EmployeeTypeEntity>();
+            Employee = Set<EmployeeEntity>();
+            EmployeeType = Set<EmployeeTypeEntity>();
         }
 
-        public DbSet<EmployeeEntity> Employees { get; }
-        public DbSet<EmployeeTypeEntity> EmployeeTypes { get; }
+        public DbSet<EmployeeEntity> Employee { get; }
+        public DbSet<EmployeeTypeEntity> EmployeeType { get; }
     }
 }

@@ -3,6 +3,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Sprout.Exam.Business.DataTransferObjects;
+using Sprout.Exam.Business.Domain;
+using System;
+using System.Threading;
 
 namespace Sprout.Exam.WebApp.Controllers
 {
@@ -11,6 +14,12 @@ namespace Sprout.Exam.WebApp.Controllers
     [ApiController]
     public class EmployeesController : ControllerBase
     {
+        private readonly IAddEmployeeCommand _addEmployeeCommand;
+
+        public EmployeesController(IAddEmployeeCommand addEmployeeCommand)
+        {
+            _addEmployeeCommand = addEmployeeCommand;
+        }
 
         /// <summary>
         /// Refactor this method to go through proper layers and fetch from the DB.
@@ -55,21 +64,20 @@ namespace Sprout.Exam.WebApp.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public async Task<IActionResult> Post(CreateEmployeeDto input)
+        public async Task<IActionResult> Post([FromBody]CreateEmployeeDto input, CancellationToken cancellationToken)
         {
-
-           var id = await Task.FromResult(StaticEmployees.ResultList.Max(m => m.Id) + 1);
-
-            StaticEmployees.ResultList.Add(new EmployeeDto
+            if (input == null)
             {
-                Birthdate = input.Birthdate.ToString("yyyy-MM-dd"),
-                FullName = input.FullName,
-                Id = id,
-                Tin = input.Tin,
-                TypeId = input.TypeId
-            });
+                return BadRequest();
+            }
 
-            return Created($"/api/employees/{id}", id);
+            var result = await _addEmployeeCommand.ExecuteAsync(input, User, cancellationToken);
+            if (result == null)
+            {
+                return BadRequest("Employee is already exist");
+            }
+
+            return Created($"/api/employees/{result.Id}", result.Id);
         }
 
 

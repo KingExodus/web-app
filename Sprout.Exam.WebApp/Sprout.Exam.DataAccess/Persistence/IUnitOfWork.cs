@@ -8,6 +8,6 @@ namespace Sprout.Exam.DataAccess.Persistence
         IRepository<EmployeeEntity> Employees { get; }
         IRepository<EmployeeTypeEntity> EmployeeTypes { get; }
 
-        Task SaveChangesAsync();
+        Task<int> SaveChangesAsync();
     }
 }

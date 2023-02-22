@@ -1,4 +1,5 @@
-﻿using Sprout.Exam.DataAccess.Persistence;
+﻿using Microsoft.EntityFrameworkCore;
+using Sprout.Exam.DataAccess.Persistence;
 using Sprout.Exam.Models;
 using System.Threading.Tasks;
 
@@ -19,9 +20,16 @@ namespace Sprout.Exam.DataAccess
         public IRepository<EmployeeEntity> Employees { get; }
         public IRepository<EmployeeTypeEntity> EmployeeTypes { get; }
 
-        public async Task SaveChangesAsync()
-        {
-            await _dbContext.SaveChangesAsync();
+        public async Task<int> SaveChangesAsync()
+        {   
+            try
+            {
+                return await _dbContext.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                return 0;
+            }
         }
     }
 }

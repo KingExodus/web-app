@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Sprout.Exam.Business.Domain;
+using Sprout.Exam.Business.Services;
 using Sprout.Exam.DataAccess;
 using Sprout.Exam.DataAccess.Persistence;
 
@@ -24,6 +26,7 @@ namespace Sprout.Exam.WebApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IAddEmployeeCommand, AddEmployeeCommand>();
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
