@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -7,9 +8,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Sprout.Exam.Business.Domain;
+using Sprout.Exam.Business.Domain.Query;
 using Sprout.Exam.Business.Services;
+using Sprout.Exam.Business.Services.Query;
 using Sprout.Exam.DataAccess;
 using Sprout.Exam.DataAccess.Persistence;
+using Sprout.Exam.WebApp.Mapping;
 
 namespace Sprout.Exam.WebApp
 {
@@ -28,6 +32,12 @@ namespace Sprout.Exam.WebApp
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IAddEmployeeCommand, AddEmployeeCommand>();
             services.AddScoped<IUpdateEmployeeCommand, UpdateEmployeeCommand>();
+            services.AddScoped<IEmployeeQuery, EmployeeQuery>();
+
+            var config = new MapperConfiguration(cfg => {
+                cfg.AddProfile<EmployeeProfile>();
+            });
+            services.AddSingleton(config.CreateMapper());
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(

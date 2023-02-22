@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Authorization;
 using Sprout.Exam.Business.DataTransferObjects;
 using Sprout.Exam.Business.Domain;
 using System.Threading;
+using Sprout.Exam.Business.Domain.Query;
+using AutoMapper;
+using System.Collections.Generic;
 
 namespace Sprout.Exam.WebApp.Controllers
 {
@@ -13,14 +16,20 @@ namespace Sprout.Exam.WebApp.Controllers
     [ApiController]
     public class EmployeesController : ControllerBase
     {
+        private readonly IMapper _mapper;
         private readonly IAddEmployeeCommand _addEmployeeCommand;
         private readonly IUpdateEmployeeCommand _updateEmployeeCommand;
+        private readonly IEmployeeQuery _employeeQuery;
 
-        public EmployeesController(IAddEmployeeCommand addEmployeeCommand,
-            IUpdateEmployeeCommand updateEmployeeCommand)
+        public EmployeesController(IMapper mapper,
+            IAddEmployeeCommand addEmployeeCommand,
+            IUpdateEmployeeCommand updateEmployeeCommand,
+            IEmployeeQuery employeeQuery)
         {
+            _mapper = mapper;
             _addEmployeeCommand = addEmployeeCommand;
             _updateEmployeeCommand = updateEmployeeCommand;
+            _employeeQuery = employeeQuery;
         }
 
         /// <summary>
@@ -28,10 +37,11 @@ namespace Sprout.Exam.WebApp.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get(CancellationToken cancellationToken)
         {
-            var result = await Task.FromResult(StaticEmployees.ResultList);
-            return Ok(result);
+            var result = await _employeeQuery.ExecuteAsync(User, cancellationToken);
+            
+            return Ok(_mapper.Map<List<EmployeeDto>>(result));
         }
 
         /// <summary>
