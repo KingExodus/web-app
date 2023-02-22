@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Sprout.Exam.Business.DataTransferObjects;
 using Sprout.Exam.Business.Domain;
-using System;
 using System.Threading;
 
 namespace Sprout.Exam.WebApp.Controllers
@@ -15,10 +14,13 @@ namespace Sprout.Exam.WebApp.Controllers
     public class EmployeesController : ControllerBase
     {
         private readonly IAddEmployeeCommand _addEmployeeCommand;
+        private readonly IUpdateEmployeeCommand _updateEmployeeCommand;
 
-        public EmployeesController(IAddEmployeeCommand addEmployeeCommand)
+        public EmployeesController(IAddEmployeeCommand addEmployeeCommand,
+            IUpdateEmployeeCommand updateEmployeeCommand)
         {
             _addEmployeeCommand = addEmployeeCommand;
+            _updateEmployeeCommand = updateEmployeeCommand;
         }
 
         /// <summary>
@@ -48,15 +50,21 @@ namespace Sprout.Exam.WebApp.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(EditEmployeeDto input)
+        public async Task<IActionResult> Put(int id, [FromBody]EditEmployeeDto input, CancellationToken cancellationToken)
         {
-            var item = await Task.FromResult(StaticEmployees.ResultList.FirstOrDefault(m => m.Id == input.Id));
-            if (item == null) return NotFound();
-            item.FullName = input.FullName;
-            item.Tin = input.Tin;
-            item.Birthdate = input.Birthdate.ToString("yyyy-MM-dd");
-            item.TypeId = input.TypeId;
-            return Ok(item);
+            if (input == null)
+            {
+                return BadRequest();
+            }
+            input.Id = id;
+
+            var result = await _updateEmployeeCommand.ExecuteAsync(input, User, cancellationToken);
+            if (result == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(result);
         }
 
         /// <summary>

@@ -27,6 +27,7 @@ namespace Sprout.Exam.WebApp
         {
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IAddEmployeeCommand, AddEmployeeCommand>();
+            services.AddScoped<IUpdateEmployeeCommand, UpdateEmployeeCommand>();
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
