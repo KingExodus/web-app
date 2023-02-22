@@ -20,16 +20,19 @@ namespace Sprout.Exam.WebApp.Controllers
         private readonly IAddEmployeeCommand _addEmployeeCommand;
         private readonly IUpdateEmployeeCommand _updateEmployeeCommand;
         private readonly IEmployeeQuery _employeeQuery;
+        private readonly IEmployeeByIdQuery _employeeByIdQuery;
 
         public EmployeesController(IMapper mapper,
             IAddEmployeeCommand addEmployeeCommand,
             IUpdateEmployeeCommand updateEmployeeCommand,
-            IEmployeeQuery employeeQuery)
+            IEmployeeQuery employeeQuery,
+            IEmployeeByIdQuery employeeByIdQuery)
         {
             _mapper = mapper;
             _addEmployeeCommand = addEmployeeCommand;
             _updateEmployeeCommand = updateEmployeeCommand;
             _employeeQuery = employeeQuery;
+            _employeeByIdQuery = employeeByIdQuery;
         }
 
         /// <summary>
@@ -49,10 +52,15 @@ namespace Sprout.Exam.WebApp.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
         {
-            var result = await Task.FromResult(StaticEmployees.ResultList.FirstOrDefault(m => m.Id == id));
-            return Ok(result);
+            var result = await _employeeByIdQuery.ExecuteAsync(id, User, cancellationToken);
+            if (result == null)
+            {
+                return NoContent();
+            }
+
+            return Ok(_mapper.Map<EmployeeDto>(result));
         }
 
         /// <summary>
