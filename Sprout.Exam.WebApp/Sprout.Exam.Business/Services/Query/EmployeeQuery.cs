@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Linq;
 
 namespace Sprout.Exam.Business.Services.Query
 {
@@ -19,7 +20,9 @@ namespace Sprout.Exam.Business.Services.Query
 
         public async Task<IEnumerable<EmployeeEntity>> ExecuteAsync(ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
-            return await _unitOfWork.Employees.GetAllAsync();
+            var employees = await _unitOfWork.Employees.GetAllAsync();
+
+            return employees.Where(x => !x.IsDeleted);
         }
     }
 }

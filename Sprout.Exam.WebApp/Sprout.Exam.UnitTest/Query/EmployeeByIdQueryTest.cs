@@ -43,6 +43,21 @@ namespace Sprout.Exam.UnitTest.Query
             _unitOfWorkMock.Verify(x => x.Employees.GetById(It.IsAny<int>()), Times.Once);
         }
 
+        [Fact]
+        public async Task EmployeeByIdQuery_ShouldReturnNull_IfEmployeeNotExist()
+        {
+            var command = CreateCommand();
+
+            _unitOfWorkMock.Setup(x => x.Employees.GetById(It.IsAny<int>()))
+                   .ReturnsAsync((EmployeeEntity)null);
+
+            var result = await command.ExecuteAsync(10, It.IsAny<ClaimsPrincipal>(), CancellationToken.None);
+
+            result.ShouldBeNull();
+
+            _unitOfWorkMock.Verify(x => x.Employees.GetById(It.IsAny<int>()), Times.Once);
+        }
+
         private List<EmployeeEntity> CreateEmployeeList()
         {
             return new List<EmployeeEntity>

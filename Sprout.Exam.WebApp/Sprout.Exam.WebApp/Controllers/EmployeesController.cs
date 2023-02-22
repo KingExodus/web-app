@@ -21,18 +21,21 @@ namespace Sprout.Exam.WebApp.Controllers
         private readonly IUpdateEmployeeCommand _updateEmployeeCommand;
         private readonly IEmployeeQuery _employeeQuery;
         private readonly IEmployeeByIdQuery _employeeByIdQuery;
+        private readonly IRemoveEmployeeCommand _removeEmployeeCommand;
 
         public EmployeesController(IMapper mapper,
             IAddEmployeeCommand addEmployeeCommand,
             IUpdateEmployeeCommand updateEmployeeCommand,
             IEmployeeQuery employeeQuery,
-            IEmployeeByIdQuery employeeByIdQuery)
+            IEmployeeByIdQuery employeeByIdQuery,
+            IRemoveEmployeeCommand removeEmployeeCommand)
         {
             _mapper = mapper;
             _addEmployeeCommand = addEmployeeCommand;
             _updateEmployeeCommand = updateEmployeeCommand;
             _employeeQuery = employeeQuery;
             _employeeByIdQuery = employeeByIdQuery;
+            _removeEmployeeCommand = removeEmployeeCommand;
         }
 
         /// <summary>
@@ -106,21 +109,21 @@ namespace Sprout.Exam.WebApp.Controllers
             return Created($"/api/employees/{result.Id}", result.Id);
         }
 
-
         /// <summary>
         /// Refactor this method to go through proper layers and perform soft deletion of an employee to the DB.
         /// </summary>
         /// <returns></returns>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {
-            var result = await Task.FromResult(StaticEmployees.ResultList.FirstOrDefault(m => m.Id == id));
-            if (result == null) return NotFound();
-            StaticEmployees.ResultList.RemoveAll(m => m.Id == id);
-            return Ok(id);
+            var result = await _removeEmployeeCommand.ExecuteAsync(id, User, cancellationToken);
+            if (result == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(result.Id);
         }
-
-
 
         /// <summary>
         /// Refactor this method to go through proper layers and use Factory pattern

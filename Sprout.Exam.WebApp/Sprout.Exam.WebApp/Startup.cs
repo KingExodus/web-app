@@ -34,6 +34,7 @@ namespace Sprout.Exam.WebApp
             services.AddScoped<IUpdateEmployeeCommand, UpdateEmployeeCommand>();
             services.AddScoped<IEmployeeQuery, EmployeeQuery>();
             services.AddScoped<IEmployeeByIdQuery, EmployeeByIdQuery>();
+            services.AddScoped<IRemoveEmployeeCommand, RemoveEmployeeCommand>();
 
             var config = new MapperConfiguration(cfg => {
                 cfg.AddProfile<EmployeeProfile>();
