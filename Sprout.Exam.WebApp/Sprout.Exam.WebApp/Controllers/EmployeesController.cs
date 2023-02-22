@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Sprout.Exam.Business.DataTransferObjects;
@@ -22,13 +21,15 @@ namespace Sprout.Exam.WebApp.Controllers
         private readonly IEmployeeQuery _employeeQuery;
         private readonly IEmployeeByIdQuery _employeeByIdQuery;
         private readonly IRemoveEmployeeCommand _removeEmployeeCommand;
+        private readonly ICalculateSalaryCommand _calculateSalaryCommand;
 
         public EmployeesController(IMapper mapper,
             IAddEmployeeCommand addEmployeeCommand,
             IUpdateEmployeeCommand updateEmployeeCommand,
             IEmployeeQuery employeeQuery,
             IEmployeeByIdQuery employeeByIdQuery,
-            IRemoveEmployeeCommand removeEmployeeCommand)
+            IRemoveEmployeeCommand removeEmployeeCommand,
+            ICalculateSalaryCommand calculateSalaryCommand)
         {
             _mapper = mapper;
             _addEmployeeCommand = addEmployeeCommand;
@@ -36,6 +37,7 @@ namespace Sprout.Exam.WebApp.Controllers
             _employeeQuery = employeeQuery;
             _employeeByIdQuery = employeeByIdQuery;
             _removeEmployeeCommand = removeEmployeeCommand;
+            _calculateSalaryCommand = calculateSalaryCommand;
         }
 
         /// <summary>
@@ -133,23 +135,16 @@ namespace Sprout.Exam.WebApp.Controllers
         /// <param name="workedDays"></param>
         /// <returns></returns>
         [HttpPost("{id}/calculate")]
-        public async Task<IActionResult> Calculate(int id,decimal absentDays,decimal workedDays)
+        public async Task<IActionResult> Calculate([FromBody]EmployeeSalaryDto input, CancellationToken cancellationToken)
         {
-            var result = await Task.FromResult(StaticEmployees.ResultList.FirstOrDefault(m => m.Id == id));
-
-            //if (result == null) 
-            return NotFound();
-            /*var type = (EmployeeType) result.TypeId;
-            return type switch
+            if (input == null)
             {
-                EmployeeType.Regular =>
-                    //create computation for regular.
-                    Ok(25000),
-                EmployeeType.Contractual =>
-                    //create computation for contractual.
-                    Ok(20000),
-                _ => NotFound("Employee Type not found")
-            };*/
+                return BadRequest();
+            }
+
+            var result = await _calculateSalaryCommand.ExecuteAsync(input, User, cancellationToken);
+
+            return Ok(result);
 
         }
 
