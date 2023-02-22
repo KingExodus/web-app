@@ -8,8 +8,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Sprout.Exam.Business.Domain;
+using Sprout.Exam.Business.Domain.Factory;
 using Sprout.Exam.Business.Domain.Query;
 using Sprout.Exam.Business.Services;
+using Sprout.Exam.Business.Services.Factory;
 using Sprout.Exam.Business.Services.Query;
 using Sprout.Exam.DataAccess;
 using Sprout.Exam.DataAccess.Persistence;
@@ -36,6 +38,8 @@ namespace Sprout.Exam.WebApp
             services.AddScoped<IEmployeeByIdQuery, EmployeeByIdQuery>();
             services.AddScoped<IRemoveEmployeeCommand, RemoveEmployeeCommand>();
             services.AddScoped<ICalculateSalaryCommand, CalculateSalaryCommand>();
+            services.AddScoped<IEmploymentTypeFactory, RegularEmploymentTypeFactory>();
+            services.AddScoped<IEmploymentTypeFactory, ContractualEmploymentTypeFactory>();
 
             var config = new MapperConfiguration(cfg => {
                 cfg.AddProfile<EmployeeProfile>();

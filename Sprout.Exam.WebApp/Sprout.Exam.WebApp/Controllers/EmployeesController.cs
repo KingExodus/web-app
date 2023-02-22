@@ -144,8 +144,7 @@ namespace Sprout.Exam.WebApp.Controllers
 
             var result = await _calculateSalaryCommand.ExecuteAsync(input, User, cancellationToken);
 
-            return Ok(result);
-
+            return Ok(result.SalaryNetPay);
         }
 
     }

@@ -3,6 +3,6 @@
     public class EmployeePayrollDto : BaseSaveEmployeeDto
     {
         public int Id { get; set; }
-        public int SalaryNetPay { get; set; }
+        public decimal SalaryNetPay { get; set; }
     }
 }

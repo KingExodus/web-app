@@ -6,16 +6,21 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Threading;
 using Sprout.Exam.Business.DataTransferObjects;
+using Sprout.Exam.Business.Domain.Factory;
+using Sprout.Exam.Business.Services.Factory;
 
 namespace Sprout.Exam.Business.Services
 {
     public class CalculateSalaryCommand : ICalculateSalaryCommand
     {
         private readonly IUnitOfWork _unitOfWork;
+        private IEmploymentTypeFactory _employmentTypeFactory;
 
-        public CalculateSalaryCommand(IUnitOfWork unitOfWork)
+        public CalculateSalaryCommand(IUnitOfWork unitOfWork,
+            IEmploymentTypeFactory employmentTypeFactory)
         {
             _unitOfWork = unitOfWork;
+            _employmentTypeFactory = employmentTypeFactory;
         }
 
         public async Task<EmployeePayrollDto> ExecuteAsync(EmployeeSalaryDto input, ClaimsPrincipal principal, CancellationToken cancellationToken)
@@ -39,12 +44,16 @@ namespace Sprout.Exam.Business.Services
 
             if (employee.TypeId == (int)EmployeeType.Regular)
             {
-                // TODO
+                _employmentTypeFactory = new RegularEmploymentTypeFactory();
+
+                employee.SalaryNetPay = _employmentTypeFactory.ComputeSalary(input.AbsentDays);
             }
 
             if (employee.TypeId == (int)EmployeeType.Contractual)
             {
-                // TODO
+                _employmentTypeFactory = new ContractualEmploymentTypeFactory();
+
+                employee.SalaryNetPay = _employmentTypeFactory.ComputeSalary(input.WorkedDays);
             }
 
             return employee;
