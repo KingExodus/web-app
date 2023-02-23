@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Sprout.Exam.Business.DataTransferObjects;
-using Sprout.Exam.Common.Enums;
+using Sprout.Exam.Business.Domain;
+using System.Threading;
+using Sprout.Exam.Business.Domain.Query;
+using AutoMapper;
+using System.Collections.Generic;
 
 namespace Sprout.Exam.WebApp.Controllers
 {
@@ -15,16 +15,41 @@ namespace Sprout.Exam.WebApp.Controllers
     [ApiController]
     public class EmployeesController : ControllerBase
     {
+        private readonly IMapper _mapper;
+        private readonly IAddEmployeeCommand _addEmployeeCommand;
+        private readonly IUpdateEmployeeCommand _updateEmployeeCommand;
+        private readonly IEmployeeQuery _employeeQuery;
+        private readonly IEmployeeByIdQuery _employeeByIdQuery;
+        private readonly IRemoveEmployeeCommand _removeEmployeeCommand;
+        private readonly ICalculateSalaryCommand _calculateSalaryCommand;
+
+        public EmployeesController(IMapper mapper,
+            IAddEmployeeCommand addEmployeeCommand,
+            IUpdateEmployeeCommand updateEmployeeCommand,
+            IEmployeeQuery employeeQuery,
+            IEmployeeByIdQuery employeeByIdQuery,
+            IRemoveEmployeeCommand removeEmployeeCommand,
+            ICalculateSalaryCommand calculateSalaryCommand)
+        {
+            _mapper = mapper;
+            _addEmployeeCommand = addEmployeeCommand;
+            _updateEmployeeCommand = updateEmployeeCommand;
+            _employeeQuery = employeeQuery;
+            _employeeByIdQuery = employeeByIdQuery;
+            _removeEmployeeCommand = removeEmployeeCommand;
+            _calculateSalaryCommand = calculateSalaryCommand;
+        }
 
         /// <summary>
         /// Refactor this method to go through proper layers and fetch from the DB.
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get(CancellationToken cancellationToken)
         {
-            var result = await Task.FromResult(StaticEmployees.ResultList);
-            return Ok(result);
+            var result = await _employeeQuery.ExecuteAsync(User, cancellationToken);
+            
+            return Ok(_mapper.Map<List<EmployeeDto>>(result));
         }
 
         /// <summary>
@@ -32,10 +57,15 @@ namespace Sprout.Exam.WebApp.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
         {
-            var result = await Task.FromResult(StaticEmployees.ResultList.FirstOrDefault(m => m.Id == id));
-            return Ok(result);
+            var result = await _employeeByIdQuery.ExecuteAsync(id, User, cancellationToken);
+            if (result == null)
+            {
+                return NoContent();
+            }
+
+            return Ok(_mapper.Map<EmployeeDto>(result));
         }
 
         /// <summary>
@@ -43,15 +73,21 @@ namespace Sprout.Exam.WebApp.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(EditEmployeeDto input)
+        public async Task<IActionResult> Put(int id, [FromBody]EditEmployeeDto input, CancellationToken cancellationToken)
         {
-            var item = await Task.FromResult(StaticEmployees.ResultList.FirstOrDefault(m => m.Id == input.Id));
-            if (item == null) return NotFound();
-            item.FullName = input.FullName;
-            item.Tin = input.Tin;
-            item.Birthdate = input.Birthdate.ToString("yyyy-MM-dd");
-            item.TypeId = input.TypeId;
-            return Ok(item);
+            if (input == null)
+            {
+                return BadRequest();
+            }
+            input.Id = id;
+
+            var result = await _updateEmployeeCommand.ExecuteAsync(input, User, cancellationToken);
+            if (result == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(result);
         }
 
         /// <summary>
@@ -59,38 +95,37 @@ namespace Sprout.Exam.WebApp.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public async Task<IActionResult> Post(CreateEmployeeDto input)
+        public async Task<IActionResult> Post([FromBody]CreateEmployeeDto input, CancellationToken cancellationToken)
         {
-
-           var id = await Task.FromResult(StaticEmployees.ResultList.Max(m => m.Id) + 1);
-
-            StaticEmployees.ResultList.Add(new EmployeeDto
+            if (input == null)
             {
-                Birthdate = input.Birthdate.ToString("yyyy-MM-dd"),
-                FullName = input.FullName,
-                Id = id,
-                Tin = input.Tin,
-                TypeId = input.TypeId
-            });
+                return BadRequest();
+            }
 
-            return Created($"/api/employees/{id}", id);
+            var result = await _addEmployeeCommand.ExecuteAsync(input, User, cancellationToken);
+            if (result == null)
+            {
+                return BadRequest("Employee is already exist");
+            }
+
+            return Created($"/api/employees/{result.Id}", result.Id);
         }
-
 
         /// <summary>
         /// Refactor this method to go through proper layers and perform soft deletion of an employee to the DB.
         /// </summary>
         /// <returns></returns>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {
-            var result = await Task.FromResult(StaticEmployees.ResultList.FirstOrDefault(m => m.Id == id));
-            if (result == null) return NotFound();
-            StaticEmployees.ResultList.RemoveAll(m => m.Id == id);
-            return Ok(id);
+            var result = await _removeEmployeeCommand.ExecuteAsync(id, User, cancellationToken);
+            if (result == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(result.Id);
         }
-
-
 
         /// <summary>
         /// Refactor this method to go through proper layers and use Factory pattern
@@ -100,23 +135,16 @@ namespace Sprout.Exam.WebApp.Controllers
         /// <param name="workedDays"></param>
         /// <returns></returns>
         [HttpPost("{id}/calculate")]
-        public async Task<IActionResult> Calculate(int id,decimal absentDays,decimal workedDays)
+        public async Task<IActionResult> Calculate([FromBody]EmployeeSalaryDto input, CancellationToken cancellationToken)
         {
-            var result = await Task.FromResult(StaticEmployees.ResultList.FirstOrDefault(m => m.Id == id));
-
-            if (result == null) return NotFound();
-            var type = (EmployeeType) result.TypeId;
-            return type switch
+            if (input == null)
             {
-                EmployeeType.Regular =>
-                    //create computation for regular.
-                    Ok(25000),
-                EmployeeType.Contractual =>
-                    //create computation for contractual.
-                    Ok(20000),
-                _ => NotFound("Employee Type not found")
-            };
+                return BadRequest();
+            }
 
+            var result = await _calculateSalaryCommand.ExecuteAsync(input, User, cancellationToken);
+
+            return Ok(result.SalaryNetPay);
         }
 
     }

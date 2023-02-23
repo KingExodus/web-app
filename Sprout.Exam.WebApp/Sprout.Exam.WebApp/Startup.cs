@@ -1,16 +1,22 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Sprout.Exam.WebApp.Data;
-using Sprout.Exam.WebApp.Models;
+using Sprout.Exam.Business.Domain;
+using Sprout.Exam.Business.Domain.Factory;
+using Sprout.Exam.Business.Domain.Query;
+using Sprout.Exam.Business.Extensions;
+using Sprout.Exam.Business.Services;
+using Sprout.Exam.Business.Services.Factory;
+using Sprout.Exam.Business.Services.Query;
+using Sprout.Exam.DataAccess;
+using Sprout.Exam.DataAccess.Persistence;
+using Sprout.Exam.WebApp.Mapping;
 
 namespace Sprout.Exam.WebApp
 {
@@ -26,6 +32,13 @@ namespace Sprout.Exam.WebApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDependencyServices();
+
+            var config = new MapperConfiguration(cfg => {
+                cfg.AddProfile<EmployeeProfile>();
+            });
+            services.AddSingleton(config.CreateMapper());
+
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
@@ -65,6 +78,8 @@ namespace Sprout.Exam.WebApp
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
+            app.UseExceptionHandling();
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
