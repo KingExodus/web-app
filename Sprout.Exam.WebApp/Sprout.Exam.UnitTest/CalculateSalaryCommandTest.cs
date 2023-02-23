@@ -26,8 +26,7 @@ namespace Sprout.Exam.UnitTest
             _unitOfWorkMock = new Mock<IUnitOfWork>();
             _employmentTypeFactoryMock = new Mock<IEmploymentTypeFactory>();
 
-            return new CalculateSalaryCommand(_unitOfWorkMock.Object,
-                _employmentTypeFactoryMock.Object);
+            return new CalculateSalaryCommand(_unitOfWorkMock.Object);
         }
 
         [Fact]

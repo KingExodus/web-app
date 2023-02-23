@@ -16,11 +16,9 @@ namespace Sprout.Exam.Business.Services
         private readonly IUnitOfWork _unitOfWork;
         private IEmploymentTypeFactory _employmentTypeFactory;
 
-        public CalculateSalaryCommand(IUnitOfWork unitOfWork,
-            IEmploymentTypeFactory employmentTypeFactory)
+        public CalculateSalaryCommand(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _employmentTypeFactory = employmentTypeFactory;
         }
 
         public async Task<EmployeePayrollDto> ExecuteAsync(EmployeeSalaryDto input, ClaimsPrincipal principal, CancellationToken cancellationToken)

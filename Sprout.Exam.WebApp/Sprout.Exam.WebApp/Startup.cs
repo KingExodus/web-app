@@ -10,6 +10,7 @@ using Microsoft.Extensions.Hosting;
 using Sprout.Exam.Business.Domain;
 using Sprout.Exam.Business.Domain.Factory;
 using Sprout.Exam.Business.Domain.Query;
+using Sprout.Exam.Business.Extensions;
 using Sprout.Exam.Business.Services;
 using Sprout.Exam.Business.Services.Factory;
 using Sprout.Exam.Business.Services.Query;
@@ -31,15 +32,7 @@ namespace Sprout.Exam.WebApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
-            services.AddScoped<IAddEmployeeCommand, AddEmployeeCommand>();
-            services.AddScoped<IUpdateEmployeeCommand, UpdateEmployeeCommand>();
-            services.AddScoped<IEmployeeQuery, EmployeeQuery>();
-            services.AddScoped<IEmployeeByIdQuery, EmployeeByIdQuery>();
-            services.AddScoped<IRemoveEmployeeCommand, RemoveEmployeeCommand>();
-            services.AddScoped<ICalculateSalaryCommand, CalculateSalaryCommand>();
-            services.AddScoped<IEmploymentTypeFactory, RegularEmploymentTypeFactory>();
-            services.AddScoped<IEmploymentTypeFactory, ContractualEmploymentTypeFactory>();
+            services.AddDependencyServices();
 
             var config = new MapperConfiguration(cfg => {
                 cfg.AddProfile<EmployeeProfile>();
@@ -85,6 +78,8 @@ namespace Sprout.Exam.WebApp
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
+            app.UseExceptionHandling();
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
