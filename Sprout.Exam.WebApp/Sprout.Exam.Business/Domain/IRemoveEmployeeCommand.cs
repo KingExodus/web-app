@@ -7,6 +7,6 @@ namespace Sprout.Exam.Business.Domain
 {
     public interface IRemoveEmployeeCommand
     {
-        Task<EmployeeEntity> ExecuteAsync(int id, ClaimsPrincipal principal, CancellationToken cancellationToken);
+        Task<CommandResult<EmployeeEntity>> ExecuteAsync(int id, ClaimsPrincipal principal, CancellationToken cancellationToken);
     }
 }

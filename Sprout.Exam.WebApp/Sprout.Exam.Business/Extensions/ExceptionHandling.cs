@@ -46,7 +46,7 @@ namespace Sprout.Exam.Business.Extensions
                         break;
                     default:
                         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                        await context.Response.WriteAsync(JsonSerializer.Serialize($"An unexpected error occured."));
+                        await context.Response.WriteAsync(JsonSerializer.Serialize($"An unexpected error occured. {ex.Message}"));
                         break;
                 }
             }

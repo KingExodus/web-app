@@ -18,7 +18,7 @@ namespace Sprout.Exam.Business.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<EmployeeEntity> ExecuteAsync(EditEmployeeDto input, ClaimsPrincipal principal, CancellationToken cancellationToken)
+        public async Task<CommandResult<EmployeeEntity>> ExecuteAsync(EditEmployeeDto input, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
             input = input ?? throw new ArgumentNullException(nameof(input));
 
@@ -29,14 +29,14 @@ namespace Sprout.Exam.Business.Services
             }
 
             employee.FullName = input.FullName;
-            employee.Birthdate = input.Birthdate;
+            employee.Birthdate = DateTime.Parse(input.Birthdate);
             employee.TIN = input.Tin;
             employee.EmployeeTypeId = input.TypeId;
 
             _unitOfWork.Employees.Update(employee);
             await _unitOfWork.SaveChangesAsync();
 
-            return employee;
+            return new CommandResult<EmployeeEntity>(employee);
         }
     }
 }
