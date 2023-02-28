@@ -8,6 +8,6 @@ namespace Sprout.Exam.Business.Domain
 {
     public interface IUpdateEmployeeCommand
     {
-        Task<EmployeeEntity> ExecuteAsync(EditEmployeeDto input, ClaimsPrincipal principal, CancellationToken cancellationToken);
+        Task<CommandResult<EmployeeEntity>> ExecuteAsync(EditEmployeeDto input, ClaimsPrincipal principal, CancellationToken cancellationToken);
     }
 }

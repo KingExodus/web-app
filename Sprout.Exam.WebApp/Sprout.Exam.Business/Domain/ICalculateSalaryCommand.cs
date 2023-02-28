@@ -7,6 +7,6 @@ namespace Sprout.Exam.Business.Domain
 {
     public interface ICalculateSalaryCommand
     {
-        Task<EmployeePayrollDto> ExecuteAsync(EmployeeSalaryDto input, ClaimsPrincipal principal, CancellationToken cancellationToken);
+        Task<CommandResult<EmployeePayrollDto>> ExecuteAsync(EmployeeSalaryDto input, ClaimsPrincipal principal, CancellationToken cancellationToken);
     }
 }

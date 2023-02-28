@@ -16,7 +16,7 @@ namespace Sprout.Exam.Business.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<EmployeeEntity> ExecuteAsync(int id, ClaimsPrincipal principal, CancellationToken cancellationToken)
+        public async Task<CommandResult<EmployeeEntity>> ExecuteAsync(int id, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
             var employee = await _unitOfWork.Employees.GetById(id);
             if (employee == null)
@@ -29,7 +29,7 @@ namespace Sprout.Exam.Business.Services
             _unitOfWork.Employees.Update(employee);
             await _unitOfWork.SaveChangesAsync();
 
-            return employee;
+            return new CommandResult<EmployeeEntity>(employee);
         }
     }
 }

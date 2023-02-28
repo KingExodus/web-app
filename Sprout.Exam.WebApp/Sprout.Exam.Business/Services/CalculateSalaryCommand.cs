@@ -21,7 +21,7 @@ namespace Sprout.Exam.Business.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<EmployeePayrollDto> ExecuteAsync(EmployeeSalaryDto input, ClaimsPrincipal principal, CancellationToken cancellationToken)
+        public async Task<CommandResult<EmployeePayrollDto>> ExecuteAsync(EmployeeSalaryDto input, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
             input = input ?? throw new ArgumentNullException(nameof(input));
 
@@ -35,7 +35,7 @@ namespace Sprout.Exam.Business.Services
             {
                 Id = entity.Id,
                 FullName = entity.FullName,
-                Birthdate = entity.Birthdate,
+                Birthdate = entity.Birthdate.ToString(),
                 Tin = entity.TIN,
                 TypeId = entity.EmployeeTypeId,
             };
@@ -54,7 +54,7 @@ namespace Sprout.Exam.Business.Services
                 employee.SalaryNetPay = _employmentTypeFactory.ComputeSalary(input.WorkedDays);
             }
 
-            return employee;
+            return new CommandResult<EmployeePayrollDto>(employee);
         }
     }
 }

@@ -18,20 +18,20 @@ namespace Sprout.Exam.Business.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<EmployeeEntity> ExecuteAsync(CreateEmployeeDto input, ClaimsPrincipal principal, CancellationToken cancellationToken)
+        public async Task<CommandResult<int>> ExecuteAsync(CreateEmployeeDto input, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
             input = input ?? throw new ArgumentNullException(nameof(input));
 
             var employee = await _unitOfWork.Employees.GetByQuery(x => x.FullName == input.FullName);
             if (employee != null)
             {
-                return null;
+                return new CommandResult<int>("Employee is already exist");
             }
 
             employee = new EmployeeEntity
             {
                 FullName = input.FullName,
-                Birthdate = input.Birthdate,
+                Birthdate = DateTime.Parse(input.Birthdate),
                 TIN = input.Tin,
                 EmployeeTypeId = input.TypeId
             };
@@ -39,7 +39,7 @@ namespace Sprout.Exam.Business.Services
             _unitOfWork.Employees.Add(employee);
             await _unitOfWork.SaveChangesAsync();
 
-            return employee;
+            return new CommandResult<int>(employee.Id);
         }
     }
 }

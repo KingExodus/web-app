@@ -7,6 +7,7 @@ using System.Threading;
 using Sprout.Exam.Business.Domain.Query;
 using AutoMapper;
 using System.Collections.Generic;
+using Sprout.Exam.Common.Enums;
 
 namespace Sprout.Exam.WebApp.Controllers
 {
@@ -75,16 +76,22 @@ namespace Sprout.Exam.WebApp.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, [FromBody]EditEmployeeDto input, CancellationToken cancellationToken)
         {
-            if (input == null)
+            if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
+
+            if (input.Birthdate == null)
+            {
+                return BadRequest("No selected date");
+            }
+
             input.Id = id;
 
             var result = await _updateEmployeeCommand.ExecuteAsync(input, User, cancellationToken);
-            if (result == null)
+            if (result.Result != OperationResult.Success)
             {
-                return NotFound();
+                return BadRequest(_mapper.Map<CommandResult, CommandErrorResult>(result));
             }
 
             return Ok(result);
@@ -97,18 +104,23 @@ namespace Sprout.Exam.WebApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody]CreateEmployeeDto input, CancellationToken cancellationToken)
         {
-            if (input == null)
+            if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
 
-            var result = await _addEmployeeCommand.ExecuteAsync(input, User, cancellationToken);
-            if (result == null)
+            if (input.Birthdate == null)
             {
-                return BadRequest("Employee is already exist");
+                return BadRequest("No selected date");
             }
 
-            return Created($"/api/employees/{result.Id}", result.Id);
+            var result = await _addEmployeeCommand.ExecuteAsync(input, User, cancellationToken);
+            if (result.Result != OperationResult.Success)
+            {
+                return BadRequest(_mapper.Map<CommandResult, CommandErrorResult>(result));
+            }
+
+            return CreatedAtAction(nameof(GetById), new { result.Value }, result.Value);
         }
 
         /// <summary>
@@ -119,12 +131,12 @@ namespace Sprout.Exam.WebApp.Controllers
         public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {
             var result = await _removeEmployeeCommand.ExecuteAsync(id, User, cancellationToken);
-            if (result == null)
+            if (result.Result != OperationResult.Success)
             {
-                return NotFound();
+                return BadRequest(_mapper.Map<CommandResult, CommandErrorResult>(result));
             }
 
-            return Ok(result.Id);
+            return Ok(result.Value.Id);
         }
 
         /// <summary>
@@ -137,14 +149,18 @@ namespace Sprout.Exam.WebApp.Controllers
         [HttpPost("{id}/calculate")]
         public async Task<IActionResult> Calculate([FromBody]EmployeeSalaryDto input, CancellationToken cancellationToken)
         {
-            if (input == null)
+            if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
 
             var result = await _calculateSalaryCommand.ExecuteAsync(input, User, cancellationToken);
+            if (result.Result != OperationResult.Success)
+            {
+                return BadRequest(_mapper.Map<CommandResult, CommandErrorResult>(result));
+            }
 
-            return Ok(result.SalaryNetPay);
+            return Ok(result.Value.SalaryNetPay);
         }
 
     }

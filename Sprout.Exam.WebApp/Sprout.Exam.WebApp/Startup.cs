@@ -36,6 +36,7 @@ namespace Sprout.Exam.WebApp
 
             var config = new MapperConfiguration(cfg => {
                 cfg.AddProfile<EmployeeProfile>();
+                cfg.AddProfile<ErrorMappingProfile>();
             });
             services.AddSingleton(config.CreateMapper());
 
